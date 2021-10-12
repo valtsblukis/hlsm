@@ -100,7 +100,7 @@ python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_valid_seen
 
 To evaluate on both test splits and collect traces for leaderboard, run:
 ```
-python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_valid_seen
+python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_test
 ```
 
 Explore the other configurations available at `experiment_definitions/alfred/eval`.

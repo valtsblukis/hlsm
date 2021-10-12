@@ -1,0 +1,42 @@
+{
+  "@include": [
+    "alfred/env"
+  ],
+
+  "Setup": {
+    "max_rollouts": 30000,
+    "num_epochs": 6,
+    "batch_size": 1,
+    "num_workers": 0,
+
+    "load_model_file": null,
+    "save_model_file": "alfred_hlsm_subgoal_model",
+    "save_checkpoint_file": "alfred_hlsm_subgoal_model",
+    "load_checkpoint_file": null,
+    "experiment_name": "train_alfred_subgoal_model",
+
+    "dataset_type" : "subgoals",
+    "model_type": "alfred_subgoal_model",
+
+    "device": "cuda"
+  },
+
+  "Hyperparams": {
+    "gamma": 1.0,
+
+    "optimizer_args": {
+      "bert": {
+        "lr": 0.00002,
+        "weight_decay": 1e-9,
+        "warmup_steps": 30000,
+        "hold_steps": 0,
+        "cooldown_steps": 50000,
+        "num_steps": 80000
+      },
+      "nonbert": {
+        "lr": 0.00005,
+        "weight_decay": 1e-9
+      }
+    }
+  }
+}

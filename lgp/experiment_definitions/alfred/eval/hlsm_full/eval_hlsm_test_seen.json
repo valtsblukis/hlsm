@@ -1,0 +1,15 @@
+{
+  "@include": [
+    "alfred/env",
+    "alfred/eval/hlsm_full/eval_hlsm_full_base"
+  ],
+  "Setup": {
+    "env_setup": {
+      "data_splits": [
+        "tests_seen"
+      ]
+    },
+    "experiment_name": "eval_hlsm_test_seen",
+    "leaderboard_progress_file": "eval_hlsm_test_seen"
+  }
+}

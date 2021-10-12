@@ -1,0 +1,74 @@
+{
+  "@include": [
+    "alfred/env"
+  ],
+  "Setup": {
+    "env": "Alfred",
+    "env_setup": {
+      "data_splits": [
+        "valid_unseen"
+      ],
+      "filter_task_types": [],
+      "filter_all_task_types___": [
+        "look_at_obj_in_light",
+        "pick_and_place_simple",
+        "pick_and_place_with_movable_recep",
+        "pick_clean_then_place_in_recep",
+        "pick_cool_then_place_in_recep",
+        "pick_heat_then_place_in_recep",
+        "pick_two_obj_and_place"
+      ],
+      "reward_type": "sparse",
+
+      "reference_segmentation": true,
+      "reference_depth": true,
+      "reference_inventory": true,
+      "reference_pose": true,
+
+      "max_fails": 10
+    },
+
+    "agent_type": "alfred_hierarchical_action_proposal_agent",
+    "agent_setup": {
+
+      "action_proposal_file": "alfred_spatial_transformer_model_fulldata_v3_t1_e13.pytorch",
+      "depth_model_file": "perception_full_distr_joint_envaug_big_inventory_t12_e3.pytorch",
+      "seg_model_file": "perception_full_distr_joint_envaug_big_inventory_t12_segonly_e4.pytorch",
+      "navigation_model_file": "navigation_full_v_dropout_e5.pytorch",
+
+      "tree_trace_dir": null
+    },
+    "visualize_rollouts": false,
+    "save_rollout_animations_dir": null,
+    "leaderboard_progress_file": null,
+
+    "experiment_name": "alfred_eval_tapm",
+
+    "dataset_type" : "disk",
+    "dataset_dir": "NIL",
+    "batch_size": 1,
+    "num_workers": 0,
+
+    "num_rollouts": 10000,
+    "horizon": 1000,
+    "device": "cuda",
+    "dataset_device": "cpu"
+  },
+
+  "Hyperparams": {
+    "action_proposal_model_type": "alfred_spatial_transformer_model_2",
+    "use_explore_skill": true,
+
+    "task_embedding_size": 128,
+    "word_embedding_size": 64,
+    "task_cond_state_vec_dim": 32,
+    "task_lstm_layers": 1,
+    "gamma": 1.0,
+
+    "optimizer_args": {
+      "lr": 0.01,
+      "weight_decay": 1e-8
+    },
+    "ablate_task_representation": false
+  }
+}

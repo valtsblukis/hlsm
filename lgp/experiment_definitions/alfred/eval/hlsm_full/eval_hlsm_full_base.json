@@ -1,0 +1,62 @@
+{
+  "@include": [
+    "alfred/env"
+  ],
+  "Setup": {
+    "env": "Alfred",
+    "env_setup": {
+      "data_splits": [
+        "UNDEFINED"
+      ],
+      "filter_task_types": [],
+
+      "reference_segmentation": false,
+      "reference_depth": false,
+      "reference_inventory": false,
+      "reference_pose": false,
+
+      "max_fails": 10
+    },
+
+    "agent_type": "build_alfred_hierarchical_agent",
+    "agent_setup": {
+      "subgoal_model_file": "alfred_hlsm_subgoal_model_e5.pytorch",
+      "depth_model_file": "hlsm_depth_model_e3.pytorch",
+      "seg_model_file": "hlsm_segmentation_model_e4.pytorch",
+      "navigation_model_file": "hlsm_gofor_navigation_model_e5.pytorch"
+    },
+
+    "visualize_rollouts": false,
+    "save_rollout_animations_dir": null,
+    "leaderboard_progress_file": null,
+
+    "experiment_name": "UNDEFINED",
+
+    "num_rollouts": 100000,
+    "horizon": 1000,
+    "device": "cuda",
+    "dataset_device": "cpu"
+  },
+
+  "Hyperparams": {
+    "gamma": 1.0,
+
+    "perception_model": {
+      "train_for": null,
+
+      "distributional_depth": true,
+      "depth_bins": 50,
+      "max_depth": 5.0,
+
+      "depth_t_beta": 0.5,
+      "seg_t_beta": 1.0
+    },
+
+    "use_explore_skill": true,
+
+    "no_posemb_baseline": false,
+    "no_acthist_baseline": false,
+    "no_vision_baseline": false,
+    "no_language_baseline": false
+  }
+}

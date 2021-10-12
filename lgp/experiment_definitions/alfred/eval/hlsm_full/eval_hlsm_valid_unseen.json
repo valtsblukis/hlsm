@@ -1,0 +1,14 @@
+{
+  "@include": [
+    "alfred/env",
+    "alfred/eval/hlsm_full/eval_hlsm_full_base"
+  ],
+  "Setup": {
+    "env_setup": {
+      "data_splits": [
+        "valid_unseen"
+      ]
+    },
+    "experiment_name": "eval_hlsm_valid_unseen"
+  }
+}

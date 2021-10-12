@@ -1,0 +1,13 @@
+{
+  "@include": [
+    "alfred/eval/hlsm_ablations/eval_hlsm_no-language_valid_seen"
+  ],
+  "Setup": {
+    "env_setup": {
+      "data_splits": [
+        "valid_unseen"
+      ]
+    },
+    "experiment_name": "eval_hlsm_no-language_valid_unseen"
+  }
+}

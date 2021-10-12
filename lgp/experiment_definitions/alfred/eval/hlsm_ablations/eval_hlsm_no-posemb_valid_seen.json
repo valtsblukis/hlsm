@@ -1,0 +1,25 @@
+{
+  "@include": [
+    "alfred/env",
+    "alfred/eval/hlsm_full/eval_hlsm_full_base"
+  ],
+  "Setup": {
+    "env_setup": {
+      "data_splits": [
+        "valid_seen"
+      ]
+    },
+    "experiment_name": "eval_hlsm_no-posemb_valid_seen"
+  },
+
+  "Hyperparams": {
+    "gamma": 1.0,
+
+    "use_explore_skill": true,
+
+    "no_posemb_baseline": true,
+    "no_acthist_baseline": false,
+    "no_vision_baseline": false,
+    "no_language_baseline": false
+  }
+}

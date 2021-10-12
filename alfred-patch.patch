@@ -1,0 +1,219 @@
+From 265e35e028917701c0153d0fd5f9d5ba4bc8ceec Mon Sep 17 00:00:00 2001
+From: Valts Blukis <vb295@cornell.edu>
+Date: Thu, 29 Jul 2021 11:10:26 -0400
+Subject: [PATCH 2/2] Added ability to capture intermediate events from smooth
+ actions
+
+---
+ env/thor_env.py            | 54 +++++++++++++++++++++-----------------
+ gen/constants.py           |  2 +-
+ models/eval/leaderboard.py |  4 +--
+ 3 files changed, 33 insertions(+), 27 deletions(-)
+
+diff --git a/env/thor_env.py b/env/thor_env.py
+index 932fd597..9a7512c5 100644
+--- a/env/thor_env.py
++++ b/env/thor_env.py
+@@ -1,5 +1,6 @@
+ import cv2
+ import copy
++import random
+ import gen.constants as constants
+ import numpy as np
+ from collections import Counter, OrderedDict
+@@ -128,14 +129,16 @@ class ThorEnv(Controller):
+         '''
+         if smooth_nav:
+             if "MoveAhead" in action['action']:
+-                self.smooth_move_ahead(action)
++                events = self.smooth_move_ahead(action)
+             elif "Rotate" in action['action']:
+-                self.smooth_rotate(action)
++                events = self.smooth_rotate(action)
+             elif "Look" in action['action']:
+-                self.smooth_look(action)
++                events = self.smooth_look(action)
+             else:
+                 super().step(action)
++                events = []
+         else:
++            events = []
+             if "LookUp" in action['action']:
+                 self.look_angle(-constants.AGENT_HORIZON_ADJ)
+             elif "LookDown" in action['action']:
+@@ -145,7 +148,7 @@ class ThorEnv(Controller):
+ 
+         event = self.update_states(action)
+         self.check_post_conditions(action)
+-        return event
++        return event, events
+ 
+     def check_post_conditions(self, action):
+         '''
+@@ -394,37 +397,37 @@ class ThorEnv(Controller):
+         if "RotateLeft" in action:
+             action = dict(action="RotateLeft",
+                           forceAction=True)
+-            event = self.step(action, smooth_nav=smooth_nav)
++            event, events = self.step(action, smooth_nav=smooth_nav)
+         elif "RotateRight" in action:
+             action = dict(action="RotateRight",
+                           forceAction=True)
+-            event = self.step(action, smooth_nav=smooth_nav)
++            event, events = self.step(action, smooth_nav=smooth_nav)
+         elif "MoveAhead" in action:
+             action = dict(action="MoveAhead",
+                           forceAction=True)
+-            event = self.step(action, smooth_nav=smooth_nav)
++            event, events = self.step(action, smooth_nav=smooth_nav)
+         elif "LookUp" in action:
+             action = dict(action="LookUp",
+                           forceAction=True)
+-            event = self.step(action, smooth_nav=smooth_nav)
++            event, events = self.step(action, smooth_nav=smooth_nav)
+         elif "LookDown" in action:
+             action = dict(action="LookDown",
+                           forceAction=True)
+-            event = self.step(action, smooth_nav=smooth_nav)
++            event, events = self.step(action, smooth_nav=smooth_nav)
+         elif "OpenObject" in action:
+             action = dict(action="OpenObject",
+                           objectId=object_id,
+                           moveMagnitude=1.0)
+-            event = self.step(action)
++            event, events = self.step(action)
+         elif "CloseObject" in action:
+             action = dict(action="CloseObject",
+                           objectId=object_id,
+                           forceAction=True)
+-            event = self.step(action)
++            event, events = self.step(action)
+         elif "PickupObject" in action:
+             action = dict(action="PickupObject",
+                           objectId=object_id)
+-            event = self.step(action)
++            event, events = self.step(action)
+         elif "PutObject" in action:
+             inventory_object_id = self.last_event.metadata['inventoryObjects'][0]['objectId']
+             action = dict(action="PutObject",
+@@ -432,16 +435,16 @@ class ThorEnv(Controller):
+                           receptacleObjectId=object_id,
+                           forceAction=True,
+                           placeStationary=True)
+-            event = self.step(action)
++            event, events = self.step(action)
+         elif "ToggleObjectOn" in action:
+             action = dict(action="ToggleObjectOn",
+                           objectId=object_id)
+-            event = self.step(action)
++            event, events = self.step(action)
+ 
+         elif "ToggleObjectOff" in action:
+             action = dict(action="ToggleObjectOff",
+                           objectId=object_id)
+-            event = self.step(action)
++            event, events = self.step(action)
+         elif "SliceObject" in action:
+             # check if agent is holding knife in hand
+             inventory_objects = self.last_event.metadata['inventoryObjects']
+@@ -450,11 +453,11 @@ class ThorEnv(Controller):
+ 
+             action = dict(action="SliceObject",
+                           objectId=object_id)
+-            event = self.step(action)
++            event, events = self.step(action)
+         else:
+             raise Exception("Invalid action. Conversion to THOR API failed! (action='" + str(action) + "')")
+ 
+-        return event, action
++        return event, events, action
+ 
+     def check_clean(self, object_id):
+         '''
+@@ -465,12 +468,12 @@ class ThorEnv(Controller):
+         event = self.last_event
+         if event.metadata['lastActionSuccess'] and 'Faucet' in object_id:
+             # Need to delay one frame to let `isDirty` update on stream-affected.
+-            event = self.step({'action': 'Pass'})
++            event, events = self.step({'action': 'Pass'})
+             sink_basin_obj = game_util.get_obj_of_type_closest_to_obj("SinkBasin", object_id, event.metadata)
+             for in_sink_obj_id in sink_basin_obj['receptacleObjectIds']:
+                 if (game_util.get_object(in_sink_obj_id, event.metadata)['dirtyable']
+                         and game_util.get_object(in_sink_obj_id, event.metadata)['isDirty']):
+-                    event = self.step({'action': 'CleanObject', 'objectId': in_sink_obj_id})
++                    event, events = self.step({'action': 'CleanObject', 'objectId': in_sink_obj_id})
+         return event
+ 
+     def prune_by_any_interaction(self, instances_ids):
+@@ -551,7 +554,9 @@ class ThorEnv(Controller):
+             if len(instance_ids) == 0:
+                 err = "Bad interact mask. Couldn't locate target object"
+                 success = False
+-                return success, None, None, err, None
++                return success, None, [], None, err, None
++
++            print(f"Put Instance IDS: {instance_ids}")
+ 
+             target_instance_id = instance_ids[0]
+         else:
+@@ -560,10 +565,11 @@ class ThorEnv(Controller):
+         if debug:
+             print("taking action: " + str(action) + " on target_instance_id " + str(target_instance_id))
+         try:
+-            event, api_action = self.to_thor_api_exec(action, target_instance_id, smooth_nav)
++            event, events, api_action = self.to_thor_api_exec(action, target_instance_id, smooth_nav)
+         except Exception as err:
+             success = False
+-            return success, None, None, err, None
++            events = []
++            return success, None, [], None, err, None
+ 
+         if not event.metadata['lastActionSuccess']:
+             if interact_mask is not None and debug:
+@@ -577,10 +583,10 @@ class ThorEnv(Controller):
+                 cv2.waitKey(0)
+                 print(event.metadata['errorMessage'])
+             success = False
+-            return success, event, target_instance_id, event.metadata['errorMessage'], api_action
++            return success, event, events, target_instance_id, event.metadata['errorMessage'], api_action
+ 
+         success = True
+-        return success, event, target_instance_id, '', api_action
++        return success, event, events, target_instance_id, '', api_action
+ 
+     @staticmethod
+     def bbox_to_mask(bbox):
+diff --git a/gen/constants.py b/gen/constants.py
+index 2667f0dd..1b34385a 100644
+--- a/gen/constants.py
++++ b/gen/constants.py
+@@ -85,7 +85,7 @@ data_dict = OrderedDict()  # dictionary for storing trajectory data to be dumped
+ # Unity Hyperparameters
+ 
+ BUILD_PATH = None
+-X_DISPLAY = '0'
++X_DISPLAY = '1'
+ 
+ AGENT_STEP_SIZE = 0.25
+ AGENT_HORIZON_ADJ = 15
+diff --git a/models/eval/leaderboard.py b/models/eval/leaderboard.py
+index 1ba65bb7..6a336b1c 100644
+--- a/models/eval/leaderboard.py
++++ b/models/eval/leaderboard.py
+@@ -147,11 +147,11 @@ class Leaderboard(EvalTask):
+         seen_files, unseen_files = self.splits['tests_seen'], self.splits['tests_unseen']
+ 
+         # add seen trajectories to queue
+-        for traj in seen_files:
++        for i, traj in enumerate(seen_files):
+             task_queue.put(traj)
+ 
+         # add unseen trajectories to queue
+-        for traj in unseen_files:
++        for i, traj in enumerate(unseen_files):
+             task_queue.put(traj)
+ 
+         return task_queue
+-- 
+2.25.1
+

@@ -1,0 +1,53 @@
+{
+  "@include": [
+    "alfred/env"
+  ],
+
+  "Setup": {
+    "max_rollouts": 10000000,
+    "num_epochs": 4,
+    "batch_size": 6,
+    "num_workers": 12,
+
+    "load_model_file": null,
+    "save_model_file": "hlsm_depth_model",
+    "save_checkpoint_file": "hlsm_depth_model",
+    "load_checkpoint_file": null,
+
+    "experiment_name": "train_alfred_depth_model",
+
+    "dataset_type" : "perception",
+    "model_type": "alfred_perception_model",
+    "device": "cuda"
+  },
+
+  "Hyperparams": {
+    "gamma": 1.0,
+
+    "optimizer_args": {
+      "bert": {
+        "lr": 0.00005,
+        "weight_decay": 1e-9,
+        "warmup_steps": 10000,
+        "hold_steps": 10000,
+        "cooldown_steps": 40000,
+        "num_steps": 30000
+      },
+      "nonbert": {
+        "lr": 0.0001,
+        "weight_decay": 1e-9
+      }
+    },
+
+    "perception_model": {
+      "train_for": "depth",
+
+      "distributional_depth": true,
+      "depth_bins": 50,
+      "max_depth": 5.0,
+
+      "depth_t_beta": 0.5,
+      "seg_t_beta": 1.0
+    }
+  }
+}

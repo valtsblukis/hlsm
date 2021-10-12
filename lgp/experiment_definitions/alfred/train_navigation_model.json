@@ -1,0 +1,42 @@
+{
+  "@include": [
+    "alfred/env"
+  ],
+
+  "Setup": {
+    "max_rollouts": 10000000,
+    "num_epochs": 6,
+    "batch_size": 32,
+    "num_workers": 16,
+
+    "load_model_file": null,
+    "save_model_file": "hlsm_gofor_navigation_model",
+    "save_checkpoint_file": "hlsm_gofor_navigation_model",
+    "load_checkpoint_file": null,
+
+    "experiment_name": "train_alfred_spatial_navigation_model",
+
+    "dataset_type" : "navigation",
+    "model_type": "alfred_spatial_navigation_model",
+    "device": "cuda"
+  },
+
+  "Hyperparams": {
+    "gamma": 1.0,
+
+    "optimizer_args": {
+      "bert": {
+        "lr": 0.00005,
+        "weight_decay": 1e-9,
+        "warmup_steps": 10000,
+        "hold_steps": 10000,
+        "cooldown_steps": 40000,
+        "num_steps": 30000
+      },
+      "nonbert": {
+        "lr": 0.0001,
+        "weight_decay": 1e-9
+      }
+    }
+  }
+}

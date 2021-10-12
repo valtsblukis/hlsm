@@ -13,7 +13,7 @@ conda activate hlsm-alfred
 
 ### Setup Workspace
 1. Create a workspace directory somewhere on your system to store models, checkpoints, data, alfred source, etc.
-Collecting training data and 
+Collecting training data requires ~600GB of space. SSD preferred for faster training.
 ```
 mkdir <workspace dir>
 ```

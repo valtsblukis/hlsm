@@ -33,10 +33,8 @@ git clone https://github.com/askforalfred/alfred.git
 source init.sh
 ```
 
-5. Download pre-trained models (optional)
-```
-python main/download_models.py
-```
+5. (Optional) Download pre-trained models from [this Google Drive link](https://drive.google.com/drive/folders/1PlZGHQLAirFoX9lmrz32S3C1SjNVmTq-?usp=sharing) and save them into `<workspace_dir>/models`.
+
 
 ### Configuration Files
 Most scripts in this repo are parameterized by a single argument that specifies a json
@@ -47,11 +45,11 @@ configuration files (useful to share parameters among multiple configurations).
 
 ## Collect Training Data
 Training data consists of two datasets extracted from oracle rollouts in the ALFRED environment.
-The subgoal dataset consists of examples of semantic maps at the start of each navigation+manipulation sequence 
-labelled with subgoals. The navigation dataset consists of RGB images, ground-truth depth and segmentation, and 
+The subgoal dataset consists of examples of semantic maps at the start of each navigation+manipulation sequence
+labelled with subgoals. The navigation dataset consists of RGB images, ground-truth depth and segmentation, and
 2D affordance feature maps at every timestep labelled with navigation goal poses.
 
-The following command will execute the oracle actions on every training environment in ALFRED, 
+The following command will execute the oracle actions on every training environment in ALFRED,
 and store the data into `<workspace_dir>/data/rollouts`. It will take a few days to run.
 Incase the process is interrupted, run it again to resume data collection.
 ```

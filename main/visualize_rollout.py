@@ -95,7 +95,7 @@ def draw_on_img(text, img_or_shape_or_heightpx, color=(0, 0, 0), ol_color=(255, 
 def dynamic_voxel_viz(rollout, live=False):
     state_reprs = extract_frames(rollout, "agent_trace::obs_func::state_repr")
     repr_diffs = extract_frames(rollout, "agent_trace::obs_func::observed_repr")
-    subgoals = extract_frames(rollout, "agent_trace::hl_agent::action_proposal::subgoals")
+    subgoals = extract_frames(rollout, "agent_trace::hl_agent::action_proposal::subgoal")
     r_images = extract_frames(rollout, "agent_trace::skills::PickupObject::gofor::goto::reward_map")
     v_images = extract_frames(rollout, "agent_trace::skills::PickupObject::gofor::goto::v_image")
 
@@ -127,13 +127,13 @@ def dynamic_voxel_viz(rollout, live=False):
 
         if subgoal is not None:
             action_mask = subgoal.argument_mask
-            yellow_action = action_mask.repeat((1, 3, 1, 1, 1)).clone()
+            yellow_action = action_mask.data.repeat((1, 3, 1, 1, 1)).clone()
             yellow_action[:, 2, :, :, :] = -1 * (2 * yellow_action[:, 0, :, :, :])
 
             #red_goal = torch.zeros_like(yellow_action)
 
             combined_rgb = torch.clamp(all_rgb_voxelgrid.data.data + yellow_action, 0, 1)
-            print(f"Mask sum: {action_mask.sum().item()}, max: {action_mask.max().item()}")
+            print(f"Mask sum: {action_mask.data.sum().item()}, max: {action_mask.data.max().item()}")
         else:
             combined_rgb = all_rgb_voxelgrid.data.data
 

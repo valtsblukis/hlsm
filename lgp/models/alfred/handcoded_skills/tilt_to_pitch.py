@@ -7,8 +7,10 @@ from lgp.env.alfred.alfred_action import AlfredAction
 
 
 DEBUG_DISABLE_PITCHING = False
-MIN_PITCH = -1.30899694
-MAX_PITCH = 1.30899694
+#MIN_PITCH = -1.30899694
+#MAX_PITCH = 1.30899694
+MIN_PITCH = -0.785398
+MAX_PITCH = 0.785398
 
 
 class TiltToPitchSkill(Skill):

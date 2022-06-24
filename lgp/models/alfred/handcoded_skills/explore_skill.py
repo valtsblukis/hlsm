@@ -130,15 +130,16 @@ class ExploreSkill(Skill):
         if not self.pre_rotation_finished:
             action : AlfredAction = AlfredAction(action_type="RotateLeft", argument_mask=None)
             self.rotation_count += 1
-            #if self.rotation_count == 1:
-            #    action : AlfredAction = AlfredAction(action_type="LookUp", argument_mask=None)
-            if self.rotation_count == 3:
-                #action: AlfredAction = AlfredAction(action_type="LookDown", argument_mask=None)
+            if self.rotation_count == 1:
+                action : AlfredAction = AlfredAction(action_type="LookUp", argument_mask=None)
+            if self.rotation_count == 4:
+                action: AlfredAction = AlfredAction(action_type="LookDown", argument_mask=None)
                 self.rotation_count = 0
                 self.pre_rotation_finished = True
 
         # TODO: Re-check order of the next two if and elif.
         elif self._is_found(state_repr):
+            print("ExploreSkill - FOUND")
             self.navigate_finished = True
             self.pre_rotation_finished = True
             self.post_rotation_finished = True
@@ -168,10 +169,12 @@ class ExploreSkill(Skill):
 
             # Look up before rotating
             if self.rotation_count == 1:
+                print("ExploreSkill - post_rotation - LookUp")
                 action : AlfredAction = AlfredAction(action_type="LookUp", argument_mask=None)
 
             # Look back down after rotating
             if self.rotation_count == 5:
+                print("ExploreSkill - post_rotation - LookDown")
                 action: AlfredAction = AlfredAction(action_type="LookDown", argument_mask=None)
                 self.rotation_count = 0
                 self.post_rotation_finished = True

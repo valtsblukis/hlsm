@@ -15,12 +15,13 @@ from lgp.models.alfred.hlsm.hlsm_navigation_model import HlsmNavigationModel
 from lgp.ops.spatial_ops import unravel_spatial_arg
 import lgp.paths
 
-from lgp.flags import GLOBAL_VIZ
+from lgp.flags import GLOBAL_VIZ, HEURISTIC_PITCH
 
 PREDICT_EVERY_N = 50
 
 # Instead of predicting a yaw distribution to sample from, just turn towards the argmax action argument
 LEGACY_YAW = False
+
 
 
 class TriedPosYawGrid:
@@ -99,6 +100,32 @@ class GoForSkill(Skill):
 
         self.trace = {}
 
+    def _heuristic_pitch_map(self, spatial_action_arg_features_centered: torch.Tensor, voxel_size: float):
+        # At each coordinate on the map, find the pitch angle to the closest "object" or "cluster" within like 1.5m
+        w, l = list(spatial_action_arg_features_centered.shape)[2:]
+        device = spatial_action_arg_features_centered.device
+        coordgrid_vx = torch.stack(torch.meshgrid([torch.arange(0, w, 1, device=device),
+                                       torch.arange(0, l, 1, device=device)]), dim=2)
+        # Replace all non-argument pixels in the map with very large numbers
+        is_arg_mask = (spatial_action_arg_features_centered[0, 0, :, :][:, :, None] > 0.3).long()
+        masked_coordgrid = coordgrid_vx * is_arg_mask + 1e5 * (1 - is_arg_mask)
+
+        pitch_map = torch.zeros((w, l), device=device)
+        # TODO: If this works, parallelize this better
+        for x in range(w):
+            for y in range(l):
+                rel_masked_coords = masked_coordgrid - torch.tensor([x, y], device=device)[None, None, :]
+                dst_to_pt = torch.linalg.norm(rel_masked_coords, dim=2)
+                mn = torch.argmin(dst_to_pt)
+                closest_x, closest_y = mn // w, mn % w
+                height = spatial_action_arg_features_centered[0, 1, closest_x, closest_y]
+                dst_xy = dst_to_pt[closest_x, closest_y] * voxel_size
+                dst_xy = dst_xy.clamp(min=voxel_size) # avoid divison with zero if we're standing on the object
+                pitch_angle = torch.rad2deg(torch.atan2(height, dst_xy))
+                pitch_map[x, y] = pitch_angle
+        return (-pitch_map[None, None, :, :]).clone()
+
+
     def _construct_cost_function(self, state_repr: AlfredSpatialStateRepr):
         features_2d_centered = state_repr.get_nav_features_2d(center_around_agent=True)
 
@@ -113,6 +140,10 @@ class GoForSkill(Skill):
 
         pos_pred_log_distr, yaw_pred_log_distr, pitch_prediction = self.navigation_model.forward_model(
             features_2d_centered, spatial_action_arg_features_centered, subgoal_tensor)
+
+        if HEURISTIC_PITCH:
+            pitch_prediction = self._heuristic_pitch_map(
+                spatial_action_arg_features_centered, state_repr.data.voxel_size)
 
         pos_pred_distr = torch.exp(pos_pred_log_distr)  # 1x1xHxW map of P(x,y) position probabilities
         yaw_pred_distr = torch.exp(yaw_pred_log_distr)  # 1x4xHxW map of P(yaw | x,y) yaw probabilities conditioned on position

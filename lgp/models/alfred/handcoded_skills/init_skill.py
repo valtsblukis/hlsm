@@ -9,7 +9,8 @@ from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 from lgp.flags import LONG_INIT
 
 if LONG_INIT:
-    INIT_SEQUENCE = ["LookDown"] + ["RotateLeft"] * 4 + ["LookUp"] * 3 + ["RotateLeft"] * 4 + ["LookDown"] * 2 + ["Stop"]
+    INIT_SEQUENCE = ["RotateLeft"] * 4 + ["LookUp"] + ["RotateLeft"] * 4 + ["LookDown"] + ["Stop"]
+    #INIT_SEQUENCE = ["LookDown"] + ["RotateLeft"] * 4 + ["LookUp"] * 3 + ["RotateLeft"] * 4 + ["LookDown"] * 2 + ["Stop"]
 else:
     INIT_SEQUENCE = ["RotateLeft"] * 4 + ["Stop"]
 
